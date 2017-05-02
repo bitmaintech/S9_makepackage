@@ -21,3 +21,5 @@ The command line's output will show the position of fw package created.
 
 
 There are only two application from bitmain: single-board-test and bmminer, which must be copied to app-bin subdir before make package.
+
+The filesystem of linux and kernel can be complied from : https://github.com/bitmaintech/S9_firmware
