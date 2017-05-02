@@ -1,0 +1,37 @@
+#!/bin/sh
+#set -x
+check_inter="20s"
+while true; do
+    sleep $check_inter
+    #date
+    a="$(ps | grep bmminer | grep -v 'grep bmminer')"
+    
+    if [ -z "$a" ] ; then
+        b="$(ps | grep single-board-test | grep -v 'grep single-board-test')"
+        if [ -z "$b" ];then
+            /etc/init.d/bmminer.sh restart
+        fi
+    else
+        if [ "$check_inter" == "20s" ]; then
+            check_inter="20m"
+            continue
+        fi
+        A=`cat /tmp/cm.log`
+        B=`bmminer-api devs | grep "^   \[Last Valid Work\]"`
+        echo "$B" > /tmp/cm.log 
+        if [ "$B" != "" -a "$A" == "$B" ]; then
+            echo "Case B"
+            #killall -s 9 bmminer
+            sleep 1
+            #/etc/init.d/bmminer.sh restart
+        fi
+        
+        D=`bmminer-api stats | grep "^   \[miner_count\]"`
+        if [ "$D" == "" ]; then
+            echo "Case D"
+            killall -s 9 bmminer
+            sleep 1
+            /etc/init.d/bmminer.sh restart
+        fi
+    fi
+done

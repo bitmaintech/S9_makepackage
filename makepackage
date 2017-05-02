@@ -1,0 +1,243 @@
+#!/bin/bash -e
+freq=$1
+miner_type=$2
+release=$3
+ctrlbd=$4
+merged=$5
+freqtype=$6
+
+basepath=$XILINX_PACKAGE_BASE_PATH
+
+if [ "$freq"x = "clean"x ]; then
+rm $basepath/release -rf
+rm $basepath/merge/release -rf
+rm $basepath/rootfs-C5/angstrom_rootfs.jffs2 -f
+rm $basepath/rootfs-C5/s9-firmware/angstrom_rootfs.jffs2 -f
+rm $basepath/angstrom_rootfs/angstrom_rootfs.jffs2.ubi -f
+rm $basepath/angstrom_rootfs/angstrom_rootfs.jffs2 -f
+rm $basepath/angstrom_rootfs/s9-firmware-xilinx/angstrom_rootfs.jffs2 -f
+rm $basepath/merge/upgrade-rootfs-ubi/rootfs.jffs2 -f
+rm $basepath/merge/upgrade-rootfs-ubi/rootfs.jffs2.ubi -f
+rm $basepath/merge/upgrade-rootfs-ubi/upgrade-rootfs/backup/angstrom_rootfs.jffs2 -f
+rm $basepath/angstrom_rootfs/angstrom_rootfs -rf
+rm $basepath/rootfs-C5/angstram_rootfs -rf
+rm $basepath/merge/upgrade-rootfs-ubi/upgrade-rootfs -rf
+
+echo "Cleaned all the files which is created by makepackage!"
+exit 0
+fi
+
+rm $basepath/angstrom_rootfs/angstrom_rootfs -rf
+cd $basepath/angstrom_rootfs
+tar -zxvf angstrom_rootfs.tgz
+
+rm $basepath/rootfs-C5/angstram_rootfs -rf
+cd $basepath/rootfs-C5
+tar -zxvf angstram_rootfs.tgz
+
+cd $basepath
+
+rm $basepath/release -rf
+mkdir $basepath/release
+mkdir $basepath/release/c5
+mkdir $basepath/release/xilinx
+
+cp $basepath/app-bin/* $basepath/angstrom_rootfs/angstrom_rootfs/usr/bin/ -rf
+cp $basepath/app-bin/* $basepath/rootfs-C5/angstram_rootfs/usr/bin/ -rf
+
+#if [ "$miner_type"x = "T9+"x ]; then
+#cp $basepath/T9+-app-bin/* $basepath/angstrom_rootfs/angstrom_rootfs/usr/bin/ -rf
+#cp $basepath/T9+-app-bin/* $basepath/rootfs-C5/angstram_rootfs/usr/bin/ -rf
+#elif [ "$miner_type"x = "T9"x ]; then
+#cp $basepath/T9-app-bin/* $basepath/angstrom_rootfs/angstrom_rootfs/usr/bin/ -rf
+#cp $basepath/T9-app-bin/* $basepath/rootfs-C5/angstram_rootfs/usr/bin/ -rf
+#elif [ "$miner_type"x = "S9"x ]; then
+#cp $basepath/S9-app-bin/* $basepath/angstrom_rootfs/angstrom_rootfs/usr/bin/ -rf
+#cp $basepath/S9-app-bin/* $basepath/rootfs-C5/angstram_rootfs/usr/bin/ -rf
+#elif [ "$miner_type"x = "R4"x ]; then
+#cp $basepath/R4-app-bin/* $basepath/angstrom_rootfs/angstrom_rootfs/usr/bin/ -rf
+#cp $basepath/R4-app-bin/* $basepath/rootfs-C5/angstram_rootfs/usr/bin/ -rf
+#else
+#echo "error miner type, must be S9 T9 T9+ R4"
+#exit 0
+#fi
+
+cp $basepath/auto-mem/fpga_mem_driver.ko $basepath/angstrom_rootfs/angstrom_rootfs/lib/modules/fpga_mem_driver.ko -f
+
+if [ "$freqtype"x = "fixed"x ]; then
+cp $basepath/fixedfreq-sys/monitorcg $basepath/angstrom_rootfs/angstrom_rootfs/sbin/ -f
+cp $basepath/fixedfreq-sys/monitorcg $basepath/rootfs-C5/angstram_rootfs/sbin/ -f
+cp $basepath/fixedfreq-sys/automem-xilinx-bmminer.sh $basepath/angstrom_rootfs/angstrom_rootfs/etc/init.d/bmminer.sh -f
+cp $basepath/fixedfreq-sys/bmminer.sh $basepath/rootfs-C5/angstram_rootfs/etc/init.d/bmminer.sh -f
+cp $basepath/fixedfreq-sys/set_miner_conf.cgi $basepath/angstrom_rootfs/angstrom_rootfs/www/pages/cgi-bin/ -f
+cp $basepath/fixedfreq-sys/set_miner_conf.cgi $basepath/rootfs-C5/angstram_rootfs/www/pages/cgi-bin/ -f
+cp $basepath/fixedfreq-sys/minerConfiguration.cgi $basepath/angstrom_rootfs/angstrom_rootfs/www/pages/cgi-bin/ -f
+cp $basepath/fixedfreq-sys/minerConfiguration.cgi $basepath/rootfs-C5/angstram_rootfs/www/pages/cgi-bin/ -f
+#echo "1" > $basepath/angstrom_rootfs/angstrom_rootfs/etc/config/fixedfreq
+#echo "1" > $basepath/rootfs-C5/angstram_rootfs/etc/config/fixedfreq
+else
+cp $basepath/autofreq-sys/monitorcg $basepath/angstrom_rootfs/angstrom_rootfs/sbin/ -f
+cp $basepath/autofreq-sys/monitorcg $basepath/rootfs-C5/angstram_rootfs/sbin/ -f
+
+cp $basepath/autofreq-sys/automem-xilinx-bmminer.sh $basepath/angstrom_rootfs/angstrom_rootfs/etc/init.d/bmminer.sh -f
+cp $basepath/autofreq-sys/bmminer.sh $basepath/rootfs-C5/angstram_rootfs/etc/init.d/bmminer.sh -f
+cp $basepath/autofreq-sys/set_miner_conf.cgi $basepath/angstrom_rootfs/angstrom_rootfs/www/pages/cgi-bin/ -f
+cp $basepath/autofreq-sys/set_miner_conf.cgi $basepath/rootfs-C5/angstram_rootfs/www/pages/cgi-bin/ -f
+cp $basepath/autofreq-sys/minerConfiguration.cgi $basepath/angstrom_rootfs/angstrom_rootfs/www/pages/cgi-bin/ -f
+cp $basepath/autofreq-sys/minerConfiguration.cgi $basepath/rootfs-C5/angstram_rootfs/www/pages/cgi-bin/ -f
+#rm $basepath/angstrom_rootfs/angstrom_rootfs/etc/config/fixedfreq -f
+#rm $basepath/rootfs-C5/angstram_rootfs/etc/config/fixedfreq -f
+fi
+
+if [ "$ctrlbd"x != "c5"x ] && [ "$ctrlbd"x != "xilinx"x ] && [ "$ctrlbd"x != "all"x ]; then
+echo "error ctrlbd type, must be c5 or xilinx or all"
+exit 0
+fi
+
+if [ "$release"x = "user"x ]; then
+rm $basepath/angstrom_rootfs/angstrom_rootfs/etc/config/forcefreq.txt -f
+rm $basepath/angstrom_rootfs/angstrom_rootfs/etc/config/rebootTest -f
+rm $basepath/rootfs-C5/angstram_rootfs/etc/config/forcefreq.txt -f
+rm $basepath/rootfs-C5/angstram_rootfs/etc/config/rebootTest -f
+echo "2" > $basepath/angstrom_rootfs/angstrom_rootfs/etc/config/restartTest
+echo "2" > $basepath/rootfs-C5/angstram_rootfs/etc/config/restartTest
+#rm $basepath/release/xilinx/BOOT.bin -f
+cp -f $basepath/auto-mem/xilinx-BOOT.bin $basepath/release/xilinx/BOOT.bin
+cp -f $basepath/auto-mem/devicetree.dtb $basepath/release/xilinx/devicetree.dtb
+#rm $basepath/release/c5/soc_system.rbf -f
+cp -f $basepath/soc_system.rbf $basepath/release/c5/soc_system.rbf
+fi
+
+if [ "$release"x = "test"x ]; then
+rm $basepath/angstrom_rootfs/angstrom_rootfs/etc/config/forcefreq.txt -f
+rm $basepath/angstrom_rootfs/angstrom_rootfs/etc/config/rebootTest -f
+rm $basepath/rootfs-C5/angstram_rootfs/etc/config/forcefreq.txt -f
+rm $basepath/rootfs-C5/angstram_rootfs/etc/config/rebootTest -f
+rm $basepath/angstrom_rootfs/angstrom_rootfs/etc/config/restartTest -f
+rm $basepath/rootfs-C5/angstram_rootfs/etc/config/restartTest -f
+rm $basepath/release/xilinx/BOOT.bin -f
+rm $basepath/release/c5/soc_system.rbf -f
+fi
+
+cp $basepath/Config.ini $basepath/rootfs-C5/angstram_rootfs/etc/config/Config.ini -f
+cp $basepath/Config.ini $basepath/angstrom_rootfs/angstrom_rootfs/etc/config/Config.ini -f
+
+$basepath/rootfs-C5/cp_rootfs_ko_to_make_angstrom-rootfs.jffs2 $freq $miner_type
+$basepath/angstrom_rootfs/make-angstrom-rootfs-all $freq $miner_type
+
+c5_path="$basepath/rootfs-C5/s9-firmware"
+xilinx_path="$basepath/angstrom_rootfs/s9-firmware-xilinx"
+rm -rf $c5_path/*.tar.gz
+rm -rf $xilinx_path/*.tar.gz
+rm -rf $basepath/release/*.tar.gz
+
+if [ "$ctrlbd"x = "c5"x ]; then
+cp $c5_path/* $basepath/release/c5/
+
+#if [ "$release"x = "user"x ]; then
+#cp -f $basepath/user-c5-runme.sh $basepath/release/runme.sh
+#else
+cp -f $basepath/c5-runme.sh $basepath/release/runme.sh
+#fi
+rm -rf $basepath/release/ubi_info
+rm -rf $basepath/release/xilinx/*
+fi
+
+if [ "$ctrlbd"x = "xilinx"x ]; then
+cp $xilinx_path/* $basepath/release/xilinx/
+
+#if [ "$release"x = "user"x ]; then
+#cp -f $basepath/user-xilinx-runme.sh $basepath/release/runme.sh
+#else
+cp -f $basepath/xilinx-runme.sh $basepath/release/runme.sh
+#fi
+md5sum $basepath/release/xilinx/angstrom_rootfs.jffs2 | awk {'print $1'} > $basepath/release/ubi_info
+rm -rf $basepath/release/c5/*
+fi
+
+if [ "$ctrlbd"x = "all"x ]; then
+cp $c5_path/* $basepath/release/c5/
+cp $xilinx_path/* $basepath/release/xilinx/
+
+#if [ "$release"x = "user"x ]; then
+#cp -f $basepath/user-all-runme.sh $basepath/release/runme.sh
+#else
+cp -f $basepath/all-runme.sh $basepath/release/runme.sh
+#fi
+md5sum $basepath/release/xilinx/angstrom_rootfs.jffs2 | awk {'print $1'} > $basepath/release/ubi_info
+fi
+
+cd $basepath/release
+c_time=`date "+%Y%m%d%H%M"`
+if [ "$freqtype"x = "fixed"x ]; then
+file_name="Antminer-${miner_type}-${ctrlbd}-${c_time}-${freq}M-${release}-UBI-NF.tar.gz"
+else
+file_name="Antminer-${miner_type}-${ctrlbd}-${c_time}-autofreq-${release}-UBI-NF.tar.gz"
+fi
+tar -zcvf "$file_name" *
+
+if [ "$merged"x != "merge"x ]; then
+echo "Final Package is in ${basepath}/release"
+exit 0
+fi
+
+rm $basepath/merge/upgrade-rootfs-ubi/upgrade-rootfs -rf
+cd $basepath/merge/upgrade-rootfs-ubi
+tar -zxvf upgrade-rootfs.tgz
+
+cd $basepath
+
+rm -rf $basepath/merge/release
+mkdir $basepath/merge/release
+mkdir $basepath/merge/release/c5
+mkdir $basepath/merge/release/xilinx
+
+if [ "$ctrlbd"x = "c5"x ]; then
+cp $basepath/release/c5/* $basepath/merge/release/c5/ -rf
+cp -f $basepath/merge/c5-runme.sh $basepath/merge/release/runme.sh
+rm -rf $basepath/merge/release/ubi_info
+rm -rf $basepath/merge/release/xilinx/*
+fi
+
+if [ "$ctrlbd"x = "xilinx"x ]; then
+cp $basepath/release/xilinx/angstrom_rootfs.jffs2 $basepath/merge/upgrade-rootfs-ubi/upgrade-rootfs/backup/ -f
+
+cd $basepath/merge/upgrade-rootfs-ubi
+$basepath/merge/upgrade-rootfs-ubi/make-upgrade-rootfs
+cp $basepath/merge/upgrade-rootfs-ubi/rootfs.jffs2 $basepath/merge/release/xilinx/ -f
+cp $basepath/release/xilinx/devicetree.dtb $basepath/merge/release/xilinx/ -f
+cp $basepath/merge/xilinx/uImage $basepath/merge/release/xilinx/ -f
+cp $basepath/merge/xilinx/upgrade-marker.bin $basepath/merge/release/xilinx/ -f
+
+cp $basepath/release/xilinx/BOOT.bin $basepath/merge/release/xilinx/BOOT.bin -f
+cp $basepath/merge/ubi_info $basepath/merge/release/ -f
+cp -f $basepath/merge/xilinx-runme.sh $basepath/merge/release/runme.sh
+rm -rf $basepath/merge/release/c5/*
+fi
+
+if [ "$ctrlbd"x = "all"x ]; then
+cp $basepath/release/c5/* $basepath/merge/release/c5/ -rf
+
+cp $basepath/release/xilinx/angstrom_rootfs.jffs2 $basepath/merge/upgrade-rootfs-ubi/upgrade-rootfs/backup/ -f
+cd $basepath/merge/upgrade-rootfs-ubi
+$basepath/merge/upgrade-rootfs-ubi/make-upgrade-rootfs
+cp $basepath/merge/upgrade-rootfs-ubi/rootfs.jffs2 $basepath/merge/release/xilinx/ -f
+cp $basepath/release/xilinx/devicetree.dtb $basepath/merge/release/xilinx/ -f
+cp $basepath/merge/xilinx/uImage $basepath/merge/release/xilinx/ -f
+cp $basepath/merge/xilinx/upgrade-marker.bin $basepath/merge/release/xilinx/ -f
+cp $basepath/release/xilinx/BOOT.bin $basepath/merge/release/xilinx/BOOT.bin -f
+cp $basepath/merge/ubi_info $basepath/merge/release/ -f
+cp -f $basepath/merge/all-runme.sh $basepath/merge/release/runme.sh
+fi
+
+cd $basepath/merge/release
+rm $basepath/merge/release/*.tar.gz -f
+if [ "$freqtype"x = "fixed"x ]; then
+file_name="Antminer-${miner_type}-${ctrlbd}-${c_time}-${freq}M-${release}-Update2UBI-NF.tar.gz"
+else
+file_name="Antminer-${miner_type}-${ctrlbd}-${c_time}-autofreq-${release}-Update2UBI-NF.tar.gz"
+fi
+tar -zcvf "$file_name" *
+
+echo "Final Package is in ${basepath}/merge/release"
+

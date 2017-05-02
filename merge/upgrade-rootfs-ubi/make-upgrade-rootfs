@@ -1,0 +1,2 @@
+mkfs.ubifs -r ./upgrade-rootfs -o rootfs.jffs2.ubi -e 126976 -m 2KiB -c 625 
+ubinize -v -o rootfs.jffs2 -m 2048 -p 128KiB -s 2048 ubi.cfg

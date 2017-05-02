@@ -1,0 +1,25 @@
+#!/bin/bash -e
+freq=$1
+miner_type=$2
+
+last_path=(`pwd`)
+path=$XILINX_PACKAGE_BASE_PATH/rootfs-C5
+fs_path=$XILINX_PACKAGE_BASE_PATH/rootfs-C5/angstram_rootfs
+
+chmod 666 $path/angstram_rootfs/etc/bmminer.conf.factory
+sed -i -r "s/\"bitmain-freq\" : \".*\"/\"bitmain-freq\" : \"$freq\"/g" $path/angstram_rootfs/etc/bmminer.conf.factory
+chmod 400 $path/angstram_rootfs/etc/bmminer.conf.factory
+
+echo `date` > $fs_path/usr/bin/compile_time
+echo "Antminer $miner_type" >> $fs_path/usr/bin/compile_time
+
+cd $path
+mkfs.jffs2 -r ./angstram_rootfs  -o angstrom_rootfs.jffs2 -e 0x20000 --pad=0x800000 -n
+rm -rf s9-firmware/*.tar.gz
+cp angstrom_rootfs.jffs2 s9-firmware/
+c_time=`date "+%Y%m%d%H%M"`
+file_name="Antminer-${miner_type}-${c_time}-autoFreq.tar.gz"
+cd s9-firmware
+tar -zcvf "$file_name" *
+
+cd $last_path
